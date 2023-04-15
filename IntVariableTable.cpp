@@ -6,7 +6,7 @@
 #include <iomanip>
 
 using std::string;
-
+using namespace std; 
 
 // The IntVariableTable constructor dynamically allocates the fixed size array of integer variables.
 
@@ -37,7 +37,14 @@ int IntVariableTable::numVariables() const
 
 int IntVariableTable::lookupVariable(const string& token) const
 {
-	// TODO
+	for (int i{}; i <= num_int_variables; i++)
+	{
+		if (int_variable_table[i].name == token)
+		{
+			return i;
+		}
+	}
+	return -1;
 }
 
 
@@ -50,7 +57,27 @@ int IntVariableTable::lookupVariable(const string& token) const
 
 int IntVariableTable::defineVariable(const string& token1, const string& token2)
 {
-	// TODO
+	if (lookupVariable(token1) != -1)
+	{
+		cout << "variable1 already exists" << '\n';
+		return lookupVariable(token1);
+	}
+	if (lookupVariable(token2) != -1)
+	{
+		cout << "variable2 already exists" << '\n';
+		return lookupVariable(token2);
+	}
+	if (num_int_variables >= MAX_INT_VARIABLES)
+	{
+		cout << "table is full" << '\n';
+		return -1;
+	}
+	int c = stoi(token2);
+	int_variable_table[num_int_variables].name = token1;
+	int_variable_table[num_int_variables].value = c;
+	int n = num_int_variables;
+	num_int_variables++;
+	return n;
 }
 
 
@@ -102,14 +129,14 @@ bool IntVariableTable::validIndex(int index) const
 void IntVariableTable::display() const
 {
 	if (num_int_variables == 0) {
-		std::cout << '\n' << "The integer variable table is empty\n";
+		std::cout << '\n' << "The integer variable table is empty.\n";
 	}
 	else {
 		std::cout << '\n' << "Integer variable table: [index | variable name | initial value]\n\n";
 		for (int i = 0; i < num_int_variables; i++) {
-			std::cout << std::right << std::setw(8)  << i << "    "
-				 << std::left  << std::setw(24) << addQuotes(int_variable_table[i].name)
-				 << std::right << std::setw(8)  << int_variable_table[i].value << '\n';
+			std::cout << std::right << std::setw(8) << i << "    "
+				<< std::left << std::setw(24) << addQuotes(int_variable_table[i].name)
+				<< std::right << std::setw(8) << int_variable_table[i].value << '\n';
 		}
 	}
 }

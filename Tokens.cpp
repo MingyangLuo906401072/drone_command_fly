@@ -12,7 +12,7 @@ using std::string;
 
 bool isIdentifier(const string& token)
 {
-	// TODO
+	return (!isOpcode(token) && token.length() != 0 && isalpha(token[0]) && token[token.length() - 1] != ':');
 }
 
 
@@ -21,7 +21,26 @@ bool isIdentifier(const string& token)
 
 bool isIntConstant(const string& token)
 {
-	// TODO
+	int digit = 0;
+	if (!(token[0] == '+' || token[0] == '-' || isdigit(token[0])))
+	{
+		digit = 1;
+	}
+	for (int i{ 1 }; i < token.length(); i++)
+	{
+		if (!isdigit(token[i]))
+		{
+			digit = 1;
+		}
+	}
+	if (digit == 0 && token.length() != 0)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 
@@ -31,7 +50,7 @@ bool isIntConstant(const string& token)
 
 bool isLabelDefinition(const string& token)
 {
-	// TODO
+	return (token.length() != 0 && isalpha(token[0]) && token[token.length() - 1] == ':');
 }
 
 
@@ -42,7 +61,7 @@ bool isLabelDefinition(const string& token)
 
 bool isDroneCommand(const string& token)
 {
-	// TODO
+	return (token.length() >= 2 && token[0] == '<' && token[token.length() - 1] == '>');
 }
 
 

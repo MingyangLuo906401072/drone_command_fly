@@ -48,7 +48,15 @@ void FlightPlanParse::parseLine(const string& line)
 	const char DRONE_END{ '>' };
 
 	// TODO: define a new type for the set of parse states.
+	enum class ParseStates {
+		WHITE_SPACE,
+		COMMENT,
+		DRONE_COMMAND,
+		OTHER_TOKEN
+	};
 	// TODO: declare and initialize a parse state variable.
+	// Initially in the WHITE_SPACE state 
+	ParseStates state = ParseStates::WHITE_SPACE;  
 
 	const int MAX_TOKENS{ 3 };		// Maximum number of tokens allowed
 	string tokens[MAX_TOKENS];		// Array that stores the tokens found on the line
@@ -56,11 +64,73 @@ void FlightPlanParse::parseLine(const string& line)
 	string token;					// Accumulates characters forming a token
 	bool complete_token{ false };	// Set to true when a complete token has been formed
 
-	const int n{ line.length() };
+	size_t n{ line.length() };
 
 	for (int i{ 0 }; i < n; i++) {
 		const char c = line[i];		// const to catch "c = " errors in if statements
 		// TODO: use a switch statement to implement the parse state machine.
+		switch (state) {
+		case ParseStates::WHITE_SPACE:
+			if (c == BLANK || c == TAB)
+			{
+				state = ParseStates::WHITE_SPACE;
+			}
+			if (c == COMMENT_START)
+			{
+				state = ParseStates::COMMENT;
+				i = n;
+			}
+			if (c == DRONE_START)
+			{
+				state = ParseStates::DRONE_COMMAND;
+				token.append(1, c);
+			}
+			if (c != DRONE_START && c != COMMENT_START && c != TAB && c != BLANK && c != DRONE_END)
+			{
+				state = ParseStates::OTHER_TOKEN;
+				token.push_back(c);
+			}
+			break;
+		case ParseStates::DRONE_COMMAND:
+			if (c == DRONE_END)
+			{
+				token.push_back(c);
+				complete_token = true;
+				state = ParseStates::WHITE_SPACE;
+			}
+			else
+			{
+				token.push_back(c);
+				state = ParseStates::DRONE_COMMAND;
+			}
+			break;
+		case ParseStates::OTHER_TOKEN:
+			if (c == BLANK || c == TAB)
+			{
+				complete_token = true;
+				state = ParseStates::WHITE_SPACE;
+			}
+			if (c == COMMENT_START)
+			{
+				complete_token = true; 
+				state = ParseStates::COMMENT;
+				i = n;
+			}
+			if (c != DRONE_START && c != COMMENT_START && c != TAB && c != BLANK && c != DRONE_END)
+			{
+				state = ParseStates::OTHER_TOKEN;
+				token.push_back(c);
+			}
+			break;
+		case ParseStates::COMMENT:
+			if (line[i + 1] == BLANK)
+			{
+				complete_token = true;
+			}
+			break;
+		default:
+			break;
+		}
 		if (complete_token) {
 			if (num_tokens < MAX_TOKENS) {
 				tokens[num_tokens] = token;
@@ -145,7 +215,7 @@ bool FlightPlanParse::addLabelOrInstruction(string tokens[])
 
 	if (isLabelDefinition(tokens[0])) {
 		if (tokens[1].empty() && tokens[2].empty()) {
-			int i{ tokens[0].rfind(':') };
+			size_t i{ tokens[0].rfind(':') }; 
 			if (i < tokens[0].length()) {
 				tokens[0].erase(i);
 			}
